@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="UNDER NIGHT IN-BIRTH II REP-DATA 解析工具" />
+    <title>UNI2 REP Analyzer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="UNI2 REP Analyzer">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>
+        <strong>UNI2 REP Analyzer</strong>
+      </a>
+      <button class="button button-ghost compact" data-open-file>打开文件</button>
+    </header>
+
+    <main>
+      <section id="landing" class="landing">
+        <div class="landing-head">
+          <span class="eyebrow">REP-DATA</span>
+          <h1>录像战绩分析</h1>
+          <p class="landing-intro">把每一场对战，变成下一次进步的线索。</p>
+        </div>
+
+        <div id="drop-zone" class="drop-zone" role="button" tabindex="0">
+          <div class="drop-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3v12m0-12 4 4m-4-4L8 7M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" /></svg>
+          </div>
+          <div class="drop-copy">
+            <strong>拖入 REP-DATA</strong>
+            <span>或选择文件</span>
+          </div>
+          <button class="button button-primary" data-open-file>选择</button>
+        </div>
+
+        <aside class="rep-location" aria-label="录像文件位置">
+          <span># REP-DATA 在哪里</span>
+          <p>Steam 库 → 右键游戏 → 管理 → 浏览本地文件</p>
+          <code>Save\{Steam 数字 ID}\REP-DATA</code>
+        </aside>
+        <div class="landing-features"><span>角色对策</span><span>训练场次趋势</span><span>对局复盘</span></div>
+        <button id="load-demo" class="button button-ghost demo-button">先探索演示数据 →</button>
+        <p class="sample-note">录像文件在浏览器内解析。仅公开 Steam ID 会用于查询当前昵称。</p>
+      </section>
+
+      <section id="loading-view" class="loading-view" hidden>
+        <div class="loader-ring"></div>
+        <strong>解析中</strong>
+        <span id="loading-label">读取文件…</span>
+      </section>
+
+      <section id="dashboard" class="dashboard" hidden>
+        <div class="dataset-bar">
+          <div class="dataset-copy">
+            <div class="dataset-kicker">DATASET</div>
+            <h2 id="dataset-title">REP-DATA</h2>
+            <p id="dataset-meta"></p>
+          </div>
+          <div class="dataset-actions">
+            <button id="export-json" class="button button-ghost compact">JSON</button>
+            <button id="export-csv" class="button button-ghost compact">CSV</button>
+            <button class="button button-primary compact" data-open-file>更换文件</button>
+          </div>
+        </div>
+
+        <div id="notice" class="notice" hidden></div>
+        <section id="metrics" class="metrics" aria-label="概览"></section>
+        <section class="global-filters" aria-label="全局数据筛选">
+          <div class="filter-heading"><div><span class="eyebrow">YOUR LENS</span><h3>聚焦你的对战</h3></div><label class="filter-field">分析视角<select id="owner-select" aria-label="分析视角"></select></label></div>
+          <div class="filter-grid">
+            <label class="filter-field">搜索对手<input id="match-search" type="search" placeholder="昵称、录像签名或 Steam ID" /></label>
+            <label class="filter-field">你的角色<select id="own-character-filter" data-filter="ownCharacter"><option value="">全部角色</option></select></label>
+            <label class="filter-field">对手角色<select id="character-filter" data-filter="character"><option value="">全部角色</option></select></label>
+            <label class="filter-field">结果<select id="result-filter" data-filter="result"><option value="all">全部结果</option><option value="win">胜</option><option value="loss">负</option><option value="unknown">未知</option></select></label>
+          </div>
+          <details class="advanced-filters"><summary>更多筛选 · 回合走势、Perfect、日期与所在侧</summary><div class="filter-grid">
+            <label class="filter-field">首局结果<select data-filter="opening"><option value="">全部</option><option value="won">先赢首局</option><option value="lost">先输首局</option></select></label>
+            <label class="filter-field">对局走势<select data-filter="trajectory"><option value="">全部</option><option value="comeback">让一追二</option><option value="reversed">被让一追二</option><option value="sweep">2–0 获胜</option></select></label>
+            <label class="filter-field">已记录的结束方式<select data-filter="finish"><option value="">全部</option><option value="perfect-win">打出 Perfect</option><option value="perfect-loss">被 Perfect</option><option value="timeup">出现超时回合</option></select></label>
+            <label class="filter-field">开始日期<input id="date-from" data-filter="from" type="date" /></label>
+            <label class="filter-field">结束日期<input id="date-to" data-filter="to" type="date" /></label>
+            <label class="filter-field">所在侧<select data-filter="side"><option value="">1P + 2P</option><option value="p1">1P</option><option value="p2">2P</option></select></label>
+            <label class="filter-field">回合数<select data-filter="rounds"><option value="">全部回合</option><option value="2">2 回合</option><option value="3">3 回合 · 决胜局</option><option value="1">1 回合</option><option value="4">4 回合</option><option value="5">5 回合</option></select></label>
+          </div></details>
+          <div class="filter-footer"><div class="preset-buttons"><button class="button compact button-ghost" data-preset="recent">最近 7 个录像日历日</button><button class="button compact button-ghost" data-preset="losses">复盘败局</button><button class="button compact button-ghost" data-preset="deciders">决胜局</button></div><button id="reset-filters" class="button compact button-ghost">重置筛选</button></div>
+          <div id="filter-chips" class="filter-chips"></div>
+          <p id="filter-summary" class="filter-summary" role="status" aria-live="polite"></p>
+        </section>
+
+        <nav class="tabs" aria-label="分析视图">
+          <button class="tab active" data-tab="overview">复盘总览</button>
+          <button class="tab" data-tab="matches">对局</button>
+          <button class="tab" data-tab="players">对手</button>
+          <button class="tab" data-tab="characters">角色对策</button>
+          <button class="tab" data-tab="insights">趋势</button>
+        </nav>
+
+        <section id="overview-panel" class="panel tab-panel"><div class="section-heading"><div><span>THE NEXT ROUND</span><h3>下一步，练什么</h3></div><span>基于当前筛选的已保存录像</span></div><div id="analysis-overview" class="analysis-overview"></div></section>
+        <section id="matches-panel" class="panel tab-panel" hidden>
+          <div class="toolbar">
+            <span id="match-count" class="result-count"></span>
+            <select id="match-sort" data-filter="sort" aria-label="对局排序"><option value="newest">最新优先</option><option value="oldest">最早优先</option></select>
+          </div>
+          <div class="match-list-head">
+            <span>日期</span><span>分析玩家</span><span></span><span>对手</span><span>结果</span><span>回合</span>
+          </div>
+          <div id="match-list" class="match-list"></div>
+          <button id="load-more" class="button button-ghost load-more" hidden>加载更多</button>
+        </section>
+
+        <section id="players-panel" class="panel tab-panel" hidden>
+          <div class="section-heading">
+            <div><span>OPPONENTS</span><h3>对手战绩</h3></div>
+          </div>
+          <div id="player-table" class="data-table"></div>
+        </section>
+
+        <section id="characters-panel" class="panel tab-panel" hidden>
+          <div class="section-heading">
+            <div><span>MATCHUPS</span><h3>对手角色</h3></div>
+          </div>
+          <div id="character-grid" class="character-grid"></div>
+          <div class="section-heading"><div><span>MATCHUP MATRIX</span><h3>你的角色 × 对手角色</h3></div><label class="filter-field">最少已知赛果<select id="minimum-sample"><option value="1">1 场</option><option value="5">5 场</option><option value="10">10 场</option><option value="20">20 场</option></select></label></div>
+          <div id="matchup-matrix" class="matrix-scroll"></div>
+          <p class="sample-note">胜率仅描述当前录像样本；少于 10 场标记为小样本。点击格子查看对应对局。</p>
+        </section>
+
+        <section id="insights-panel" class="panel tab-panel" hidden>
+          <div class="section-heading">
+            <div><span>TRENDS</span><h3>战绩变化</h3></div><label class="filter-field">滚动窗口<select id="rolling-window"><option value="10">10 场</option><option value="20" selected>20 场</option><option value="50">50 场</option></select></label>
+          </div>
+          <div id="insight-grid" class="insight-grid"></div>
+          <div class="section-heading"><div><span>SESSIONS</span><h3>每次开打，表现如何</h3></div></div>
+          <p class="sample-note">相邻录像时间相隔超过 30 分钟即分为新场次；根据完整记录划分，统计仅计入当前筛选。</p><div id="session-list" class="session-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <input id="file-input" type="file" hidden />
+    <dialog id="match-detail" class="detail-dialog" aria-labelledby="detail-title"><div class="detail-header"><div><span class="eyebrow">MATCH REVIEW</span><h2 id="detail-title">对局详情</h2></div><button id="close-detail" class="button button-ghost" aria-label="关闭对局详情">关闭 ×</button></div><div id="detail-body" class="detail-body"></div></dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

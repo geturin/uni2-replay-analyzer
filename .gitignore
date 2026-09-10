@@ -1,0 +1,9 @@
+# Publish only the website. Research, tests, tooling, builds and screenshots stay local.
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/index.html
+!/styles.css
+!/src/
+!/assets/

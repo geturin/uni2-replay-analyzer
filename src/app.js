@@ -160,7 +160,7 @@ $("#export-json").addEventListener("click", () => {
 $("#export-csv").addEventListener("click", () => {
   if (!state.dataset) return;
   const rows = [
-    ["slot", "date", "p1_steam_name", "p1_replay_label", "p1_account_id", "p1_steam_id64", "p1_character", "p2_steam_name", "p2_replay_label", "p2_account_id", "p2_steam_id64", "p2_character", "winner", "owner_result", "score_p1", "score_p2", "rounds", "score_source", "owner_round_path", "first_round_winner", "trajectory", "stage_id", "music_id", "observed_finishes", "mode", "battle_version", "p1_rip", "p2_rip"],
+    ["slot", "date", "p1_steam_name", "p1_replay_label", "p1_account_id", "p1_steam_id64", "p1_character", "p2_steam_name", "p2_replay_label", "p2_account_id", "p2_steam_id64", "p2_character", "winner", "owner_result", "score_p1", "score_p2", "rounds", "score_source", "owner_round_path", "first_round_winner", "trajectory", "stage_id", "music_id", "observed_finishes", "mode", "battle_version", "p1_rip", "p2_rip", "stage_name_ja", "music_name_ja"],
     ...filteredMatches().filter((match) => getOwnerContext(match, state.dataset.ownerId)).map((m) => [
       m.slot,
       formatDate(m.timestamp, true),
@@ -187,6 +187,7 @@ $("#export-csv").addEventListener("click", () => {
       m.metadata?.musicId ?? "",
       m.rounds.map((round) => round.result?.finish?.type || "unknown").join("/"),
       m.metadata?.mode || "", m.metadata?.battleVersion || "", m.p1.rip ?? "", m.p2.rip ?? "",
+      m.metadata?.stageNameJa || "", m.metadata?.musicNameJa || "",
     ]),
   ];
   downloadBlob(rows.map((r) => r.map(csvCell).join(",")).join("\n"), "uni2-replays.csv", "text/csv;charset=utf-8");

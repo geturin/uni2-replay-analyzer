@@ -1,6 +1,7 @@
 import { ownerContext } from "./analytics.js";
 import { CHARACTER_BY_ID } from "./replay-parser.js";
 import { getSteamDisplayName, validSteamId64 } from "./steam-profile.js";
+import { stageNameJa, musicNameJa } from "./replay-names.js";
 
 const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]);
 const pad = (value) => String(value).padStart(2, "0");
@@ -94,8 +95,11 @@ function roundExs(startState, context) {
 function matchMetadata(metadata) {
   if (!metadata) return "";
   const mode = ({ local: "本地对战", ranked: "排位赛", player: "玩家房间", adhoc: "ADHOC", casual: "休闲赛" })[metadata.mode];
-  return (mode ? `<span>${mode}</span>` : "") + (metadata.battleVersion ? `<span>Ver. ${escape(metadata.battleVersion)}</span>` : "") + [["舞台", metadata.stageId], ["BGM", metadata.musicId]].filter(([, value]) => Number.isInteger(value) && value >= 0)
-    .map(([label, value]) => `<span>${label} #${value}</span>`).join("");
+  const stage = stageNameJa(metadata.stageId);
+  const music = musicNameJa(metadata.musicId);
+  return (mode ? `<span>${mode}</span>` : "") + (metadata.battleVersion ? `<span>Ver. ${escape(metadata.battleVersion)}</span>` : "")
+    + `<span data-stage-name>舞台 · <span lang="ja">${escape(stage || "名称未记录")}</span></span>`
+    + `<span data-music-name>BGM · <span lang="ja">${escape(music || "曲名未记录")}</span></span>`;
 }
 
 function detailPlayer(player, side, label, won) {

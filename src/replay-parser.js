@@ -1,4 +1,5 @@
 import { deriveRoundResults } from "./round-results.js";
+import { stageNameJa, musicNameJa } from "./replay-names.js";
 
 export const RECORD_SIZE = 0x7a88;
 export const EXPECTED_RECORDS = 400;
@@ -236,6 +237,7 @@ function readMatchMetadata(view) {
     battleVersion: versionValid ? `${major}.${minorBcd.toString(16).padStart(2,"0")}` : null,
     battleVersionRaw: [major, minorBcd],
     stageId, payloadStageId, stageConsistent: stageId === payloadStageId,
+    stageNameJa: stageNameJa(stageId), musicNameJa: musicNameJa(musicRaw),
     musicId: musicRaw <= 0x7fffffff ? musicRaw : null, musicRaw,
     payloadBytes: view.getUint32(0x124, true),
     source: "native-replay-metadata" };
